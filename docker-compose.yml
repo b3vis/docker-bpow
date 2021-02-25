@@ -1,19 +1,37 @@
 version: "3.7"
 
+networks:
+  nano:
+  banano:
+
 services:
   nano-work-server:
     build: ./nano-work-server
     image: nano-work-server
+    networks:
+      - nano
     command: -c 4 -l 0.0.0.0:7000
     
+  banano-work-server:
+    build: ./nano-work-server
+    image: nano-work-server
+    networks:
+      - banano
+    command: -c 4 -l 0.0.0.0:7000
   boompow-client:
     build: ./boompow-client
     image: boompow-client
-    command: --limit-logging --async_mode --payout ban_193sufow93wj8unsuzeperm71ap1xem7fgjeo987uhjbtyi758mpdknzq9xi --worker_uri nano-work-server:7000
+    networks:
+      - banano
+    depends_on:
+      - banano-work-server
+    command: --limit-logging --async_mode --payout ban_193sufow93wj8unsuzeperm71ap1xem7fgjeo987uhjbtyi758mpdknzq9xi --worker_uri banano-work-server:7000
     
   dpow-client:
     build: ./dpow-client
     image: dpow-client
+    networks:
+      - nano
     depends_on:
       - nano-work-server
     command: --payout nano_193sufow93wj8unsuzeperm71ap1xem7fgjeo987uhjbtyi758mpdknzq9xi --worker_uri nano-work-server:7000
